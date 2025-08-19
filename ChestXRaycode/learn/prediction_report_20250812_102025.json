@@ -1,0 +1,37 @@
+{
+  "report_info": {
+    "generated_time": "2025-08-12T10:20:25.853256",
+    "model_version": "ChestXRay-v1.0",
+    "patient_id": "P20250812102025"
+  },
+  "image_analysis": {
+    "image_path": "../../data/ChestXRay/test/NORMAL/IM-0015-0001.jpeg",
+    "image_size": [
+      1803,
+      1238
+    ],
+    "predicted_class": "PNEUMONIA",
+    "confidence": 0.6098343133926392,
+    "prediction_time": "2025-08-12T10:20:25.852256",
+    "probabilities": {
+      "NORMAL": 0.39016562700271606,
+      "PNEUMONIA": 0.6098343133926392
+    }
+  },
+  "medical_assessment": {
+    "risk_level": "低风险",
+    "recommendation": "建议医疗机构复查，结合临床症状判断",
+    "urgency": "low",
+    "confidence_interpretation": "模型对此预测把握较小",
+    "disclaimers": [
+      "本结果仅供参考，不能替代专业医生诊断",
+      "如有症状或担忧，请及时就医",
+      "最终诊断需要结合临床表现和其他检查"
+    ]
+  },
+  "technical_details": {
+    "model_architecture": "ResNet50",
+    "input_size": "224x224",
+    "preprocessing": "ImageNet normalization"
+  }
+}

@@ -1,0 +1,963 @@
+{% extends "base.html" %}
+
+{% block title %}胸部X光片AI分析 - 智能医学影像诊断{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- 页面标题 -->
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-white mb-3">
+                <i class="fas fa-lungs me-3"></i>
+                胸部X光片AI分析系统
+            </h1>
+            <p class="lead text-white-50 mb-4">
+                基于深度学习的智能医学影像分析，提供专业的诊断辅助服务
+            </p>
+            <div class="row text-center text-white-50">
+                <div class="col-md-4">
+                    <i class="fas fa-brain fa-2x mb-2"></i>
+                    <p>AI智能分析</p>
+                </div>
+                <div class="col-md-4">
+                    <i class="fas fa-file-medical fa-2x mb-2"></i>
+                    <p>医学报告生成</p>
+                </div>
+                <div class="col-md-4">
+                    <i class="fas fa-shield-alt fa-2x mb-2"></i>
+                    <p>安全可靠</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 文件上传区域 -->
+        <div class="card shadow-lg mb-5">
+            <div class="card-header bg-medical-light">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-upload me-2 text-primary"></i>
+                    上传X光片图像
+                </h4>
+            </div>
+            <div class="card-body">
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <div class="upload-area p-5 text-center border-2 border-dashed rounded-3" 
+                             style="border-color: var(--secondary-color); transition: var(--transition);"
+                             ondrop="dropHandler(event);" ondragover="dragOverHandler(event);" 
+                             ondragenter="dragEnterHandler(event);" ondragleave="dragLeaveHandler(event);">
+                            
+                            <div id="upload-content">
+                                <i class="fas fa-cloud-upload-alt fa-4x text-primary mb-3"></i>
+                                <h5 class="mb-3">拖拽图片到此处或点击选择文件</h5>
+                                <p class="text-muted mb-3">
+                                    支持格式：PNG, JPG, JPEG, GIF, BMP, TIFF<br>
+                                    最大文件大小：16MB
+                                </p>
+                                <input type="file" class="form-control d-none" id="fileInput" name="file" accept="image/*" required>
+                                <button type="button" class="btn btn-primary" onclick="$('#fileInput').click()">
+                                    <i class="fas fa-folder-open me-2"></i>选择文件
+                                </button>
+                            </div>
+                            
+                            <!-- 文件预览区域 -->
+                            <div id="file-preview" class="d-none">
+                                <img id="preview-image" class="img-fluid rounded mb-3" style="max-height: 300px;">
+                                <div id="file-info" class="text-start">
+                                    <p class="mb-1"><strong>文件名：</strong><span id="file-name"></span></p>
+                                    <p class="mb-1"><strong>文件大小：</strong><span id="file-size"></span></p>
+                                    <p class="mb-3"><strong>图片尺寸：</strong><span id="image-dimensions"></span></p>
+                                </div>
+                                <!-- AI报告类型选择 -->
+                                <div class="card border-info mb-3">
+                                    <div class="card-header bg-info text-white">
+                                        <h6 class="mb-0"><i class="fas fa-robot me-2"></i>AI报告类型选择</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-check form-switch d-flex align-items-center justify-content-between">
+                                            <div class="d-flex align-items-center">
+                                                <input class="form-check-input me-3" type="checkbox" id="useOllamaSwitch" checked>
+                                                <label class="form-check-label" for="useOllamaSwitch">
+                                                    <strong>使用完整AI医学报告</strong>
+                                                </label>
+                                            </div>
+                                            <i class="fas fa-info-circle text-info" data-bs-toggle="tooltip" 
+                                               title="切换报告生成方式"></i>
+                                        </div>
+                                        
+                                        <!-- 报告类型说明 -->
+                                        <div id="report-type-description" class="mt-3 p-3 rounded">
+                                            <!-- 这里将通过JavaScript动态更新 -->
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex gap-2 justify-content-center">
+                                    <button type="submit" class="btn btn-success" id="analyzeBtn">
+                                        <i class="fas fa-magic me-2"></i>开始分析
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="resetUpload()">
+                                        <i class="fas fa-times me-2"></i>重新选择
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 分析进度 -->
+                    <div id="analysis-progress" class="d-none">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="spinner-border text-primary me-3" role="status"></div>
+                                    <div>
+                                        <h6 class="mb-1">正在分析图像...</h6>
+                                        <p class="text-muted mb-0" id="progress-text">AI正在处理您的X光片，请稍候</p>
+                                    </div>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                         id="progress-bar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 分析结果展示区域 -->
+        <div id="results-section" class="d-none">
+            <div class="card shadow-lg">
+                <div class="card-header bg-medical-light">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-clipboard-list me-2 text-success"></i>
+                        分析结果
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- 快速结果概览 -->
+                    <div id="quick-results" class="row mb-4">
+                        <!-- 这里将通过JavaScript动态填充 -->
+                    </div>
+                    
+                    <!-- 详细结果标签页 -->
+                    <ul class="nav nav-pills nav-fill mb-4" id="resultTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="basic-tab" data-bs-toggle="pill" data-bs-target="#basic-results" type="button" role="tab">
+                                <i class="fas fa-chart-pie me-2"></i>基础分析
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="medical-tab" data-bs-toggle="pill" data-bs-target="#medical-results" type="button" role="tab">
+                                <i class="fas fa-stethoscope me-2"></i>医学报告
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="recommendations-tab" data-bs-toggle="pill" data-bs-target="#recommendations-results" type="button" role="tab">
+                                <i class="fas fa-lightbulb me-2"></i>建议
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="resultTabContent">
+                        <!-- 基础分析标签页 -->
+                        <div class="tab-pane fade show active" id="basic-results" role="tabpanel">
+                            <div id="basic-analysis-content">
+                                <!-- 通过JavaScript动态填充 -->
+                            </div>
+                        </div>
+                        
+                        <!-- 医学报告标签页 -->
+                        <div class="tab-pane fade" id="medical-results" role="tabpanel">
+                            <div id="medical-report-content">
+                                <!-- 通过JavaScript动态填充 -->
+                            </div>
+                        </div>
+                        
+                        <!-- 建议标签页 -->
+                        <div class="tab-pane fade" id="recommendations-results" role="tabpanel">
+                            <div id="recommendations-content">
+                                <!-- 通过JavaScript动态填充 -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 操作按钮 -->
+                    <div class="text-center mt-4">
+                        <button class="btn btn-primary me-2" id="downloadReportBtn" onclick="downloadReport()">
+                            <i class="fas fa-download me-2"></i>下载报告
+                        </button>
+                        <button class="btn btn-info me-2" id="viewDetailedReportBtn" onclick="viewDetailedReport()">
+                            <i class="fas fa-eye me-2"></i>查看详细报告
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetAll()">
+                            <i class="fas fa-refresh me-2"></i>重新分析
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 使用说明 -->
+        <div class="card mt-5 bg-light">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-info-circle me-2 text-info"></i>
+                    使用说明
+                </h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>📋 操作步骤：</h6>
+                        <ol class="text-muted">
+                            <li>选择或拖拽胸部X光片图像</li>
+                            <li>点击"开始分析"等待AI处理</li>
+                            <li>查看详细的分析结果和建议</li>
+                            <li>可下载完整报告保存</li>
+                        </ol>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>⚠️ 重要提醒：</h6>
+                        <ul class="text-muted">
+                            <li>本系统仅供辅助诊断参考</li>
+                            <li>不能替代专业医生的诊断</li>
+                            <li>如有健康担忧请及时就医</li>
+                            <li>上传的图像会安全处理和存储</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentAnalysisId = null;
+    let selectedFile = null;
+
+    // 文件选择处理
+    $('#fileInput').on('change', function(e) {
+        handleFileSelect(e.target.files[0]);
+    });
+
+    // AI报告类型开关处理
+    $('#useOllamaSwitch').on('change', function() {
+        updateReportTypeDescription();
+    });
+
+    // 初始化报告类型说明
+    updateReportTypeDescription();
+
+    // 拖拽处理函数
+    function dragOverHandler(ev) {
+        ev.preventDefault();
+        $('.upload-area').addClass('border-primary bg-light');
+    }
+
+    function dragEnterHandler(ev) {
+        ev.preventDefault();
+    }
+
+    function dragLeaveHandler(ev) {
+        ev.preventDefault();
+        $('.upload-area').removeClass('border-primary bg-light');
+    }
+
+    function dropHandler(ev) {
+        ev.preventDefault();
+        $('.upload-area').removeClass('border-primary bg-light');
+        
+        const files = ev.dataTransfer.files;
+        if (files.length > 0) {
+            handleFileSelect(files[0]);
+        }
+    }
+
+    function handleFileSelect(file) {
+        if (!file) return;
+        
+        // 验证文件类型
+        const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/bmp', 'image/tiff'];
+        if (!allowedTypes.includes(file.type)) {
+            showNotification('请选择有效的图像文件', 'warning');
+            return;
+        }
+        
+        // 验证文件大小 (16MB)
+        if (file.size > 16 * 1024 * 1024) {
+            showNotification('文件大小不能超过16MB', 'warning');
+            return;
+        }
+        
+        selectedFile = file;
+        
+        // 显示文件预览
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            $('#preview-image').attr('src', e.target.result);
+            $('#file-name').text(file.name);
+            $('#file-size').text(formatFileSize(file.size));
+            
+            // 获取图片尺寸
+            const img = new Image();
+            img.onload = function() {
+                $('#image-dimensions').text(`${this.width} × ${this.height} 像素`);
+            };
+            img.src = e.target.result;
+            
+            // 切换显示内容
+            $('#upload-content').addClass('d-none');
+            $('#file-preview').removeClass('d-none');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // 格式化文件大小
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // 重置上传
+    function resetUpload() {
+        selectedFile = null;
+        $('#fileInput').val('');
+        $('#upload-content').removeClass('d-none');
+        $('#file-preview').addClass('d-none');
+        $('#analysis-progress').addClass('d-none');
+    }
+
+    // 重置所有
+    function resetAll() {
+        resetUpload();
+        $('#results-section').addClass('d-none');
+        currentAnalysisId = null;
+    }
+
+    // 更新报告类型描述
+    function updateReportTypeDescription() {
+        const useOllama = $('#useOllamaSwitch').prop('checked');
+        const descriptionEl = $('#report-type-description');
+        
+        if (useOllama) {
+            descriptionEl.html(`
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-robot fa-2x text-primary me-3"></i>
+                    <div>
+                        <h6 class="mb-1 text-primary">🤖 完整AI医学报告</h6>
+                        <p class="mb-0 text-muted">
+                            <small>
+                                使用Ollama大语言模型生成自然语言医学报告<br>
+                                • 个性化分析和建议<br>
+                                • 自然语言表达，易于理解<br>
+                                • 结合AI图像分析和医学知识
+                            </small>
+                        </p>
+                    </div>
+                </div>
+            `).removeClass('bg-secondary').addClass('bg-primary bg-opacity-10 border-primary');
+        } else {
+            descriptionEl.html(`
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-file-medical-alt fa-2x text-success me-3"></i>
+                    <div>
+                        <h6 class="mb-1 text-success">📋 增强版专业报告</h6>
+                        <p class="mb-0 text-muted">
+                            <small>
+                                基于规则生成结构化医学报告<br>
+                                • 专业医学格式<br>
+                                • 详细的临床发现和建议<br>
+                                • 快速生成，不依赖外部服务
+                            </small>
+                        </p>
+                    </div>
+                </div>
+            `).removeClass('bg-primary border-primary').addClass('bg-success bg-opacity-10 border-success');
+        }
+    }
+
+    // 表单提交处理
+    $('#uploadForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        if (!selectedFile) {
+            showNotification('请先选择一个文件', 'warning');
+            return;
+        }
+        
+        // 显示进度
+        $('#file-preview').addClass('d-none');
+        $('#analysis-progress').removeClass('d-none');
+        
+        // 模拟进度更新
+        simulateProgress();
+        
+        // 创建FormData
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        
+        // 添加报告类型选择
+        const useOllama = $('#useOllamaSwitch').prop('checked');
+        formData.append('use_ollama', useOllama);
+        
+        // 发送请求
+        $.ajax({
+            url: '/upload',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                hideProgress();
+                displayResults(response);
+                showNotification('分析完成！', 'success');
+            },
+            error: function(xhr, status, error) {
+                hideProgress();
+                const errorMsg = xhr.responseJSON?.error || '分析过程中发生错误';
+                showNotification(errorMsg, 'danger');
+                resetUpload();
+            }
+        });
+    });
+
+    // 模拟进度更新
+    function simulateProgress() {
+        let progress = 0;
+        const progressTexts = [
+            'AI正在处理您的X光片...',
+            '正在分析图像特征...',
+            '正在生成诊断结果...',
+            '正在生成医学报告...',
+            '分析即将完成...'
+        ];
+        
+        const interval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress > 90) progress = 90;
+            
+            $('#progress-bar').css('width', progress + '%');
+            
+            const textIndex = Math.floor(progress / 20);
+            if (textIndex < progressTexts.length) {
+                $('#progress-text').text(progressTexts[textIndex]);
+            }
+        }, 500);
+        
+        // 保存interval引用以便清除
+        window.progressInterval = interval;
+    }
+
+    // 隐藏进度
+    function hideProgress() {
+        if (window.progressInterval) {
+            clearInterval(window.progressInterval);
+        }
+        $('#progress-bar').css('width', '100%');
+        setTimeout(() => {
+            $('#analysis-progress').addClass('d-none');
+        }, 500);
+    }
+
+    // 显示结果
+    function displayResults(data) {
+        currentAnalysisId = data.file_info?.analysis_id;
+        
+        // 显示快速结果
+        displayQuickResults(data);
+        
+        // 显示详细结果
+        displayBasicAnalysis(data);
+        displayMedicalReport(data);
+        displayRecommendations(data);
+        
+        // 显示结果区域
+        $('#results-section').removeClass('d-none');
+        
+        // 滚动到结果区域
+        $('html, body').animate({
+            scrollTop: $('#results-section').offset().top - 100
+        }, 1000);
+    }
+
+    // 显示快速结果
+    function displayQuickResults(data) {
+        const imageAnalysis = data.image_analysis;
+        const assessment = data.comprehensive_assessment || {};
+        const riskLevel = assessment.risk_assessment?.level || '未知';
+        const confidence = (imageAnalysis.confidence * 100).toFixed(1);
+        
+        // 确定颜色主题
+        let riskColor = 'primary';
+        if (riskLevel.includes('高风险')) riskColor = 'danger';
+        else if (riskLevel.includes('中风险')) riskColor = 'warning';
+        else if (riskLevel.includes('低风险')) riskColor = 'info';
+        else if (riskLevel.includes('正常')) riskColor = 'success';
+        
+        const quickResultsHtml = `
+            <div class="col-md-3">
+                <div class="card border-${riskColor}">
+                    <div class="card-body text-center">
+                        <i class="fas fa-clipboard-check fa-2x text-${riskColor} mb-2"></i>
+                        <h6 class="card-title">预测结果</h6>
+                        <p class="card-text"><strong>${imageAnalysis.predicted_class === 'NORMAL' ? '正常' : '疑似肺炎'}</strong></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-info">
+                    <div class="card-body text-center">
+                        <i class="fas fa-percentage fa-2x text-info mb-2"></i>
+                        <h6 class="card-title">置信度</h6>
+                        <p class="card-text"><strong>${confidence}%</strong></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-${riskColor}">
+                    <div class="card-body text-center">
+                        <i class="fas fa-exclamation-triangle fa-2x text-${riskColor} mb-2"></i>
+                        <h6 class="card-title">风险等级</h6>
+                        <p class="card-text"><strong>${riskLevel}</strong></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-secondary">
+                    <div class="card-body text-center">
+                        <i class="fas fa-clock fa-2x text-secondary mb-2"></i>
+                        <h6 class="card-title">分析时间</h6>
+                        <p class="card-text"><strong>${new Date(imageAnalysis.prediction_time).toLocaleTimeString()}</strong></p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        $('#quick-results').html(quickResultsHtml);
+    }
+
+    // 显示基础分析
+    function displayBasicAnalysis(data) {
+        const imageAnalysis = data.image_analysis;
+        const probabilities = imageAnalysis.probabilities;
+        
+        const basicHtml = `
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-chart-pie me-2 text-primary"></i>分类概率分布</h5>
+                    <div class="mb-3">
+                        <label class="form-label">正常 (NORMAL)</label>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" style="width: ${(probabilities.NORMAL * 100).toFixed(1)}%"></div>
+                        </div>
+                        <small class="text-muted">${(probabilities.NORMAL * 100).toFixed(1)}%</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">肺炎 (PNEUMONIA)</label>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-danger" style="width: ${(probabilities.PNEUMONIA * 100).toFixed(1)}%"></div>
+                        </div>
+                        <small class="text-muted">${(probabilities.PNEUMONIA * 100).toFixed(1)}%</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5><i class="fas fa-info-circle me-2 text-info"></i>图像信息</h5>
+                    <table class="table table-sm">
+                        <tbody>
+                            <tr>
+                                <td><strong>文件名:</strong></td>
+                                <td>${data.file_info?.filename || '未知'}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>图像尺寸:</strong></td>
+                                <td>${imageAnalysis.image_size ? `${imageAnalysis.image_size[0]} × ${imageAnalysis.image_size[1]} 像素` : '未知'}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>文件大小:</strong></td>
+                                <td>${data.file_info?.file_size ? formatFileSize(data.file_info.file_size) : '未知'}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>分析时间:</strong></td>
+                                <td>${new Date(imageAnalysis.prediction_time).toLocaleString()}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+        
+        $('#basic-analysis-content').html(basicHtml);
+    }
+
+    // 显示医学报告
+    function displayMedicalReport(data) {
+        let reportHtml = '';
+        const userChoice = data.user_choice || 'unknown';
+        
+        if (data.medical_report && !data.medical_report.includes('失败') && !data.medical_report.includes('不可用')) {
+            // 显示Ollama生成的完整医学报告
+            const formattedReport = data.medical_report.replace(/\n/g, '<br>');
+            let headerClass = 'bg-primary';
+            let statusText = '';
+            
+            if (userChoice === 'ollama') {
+                headerClass = 'bg-primary';
+                statusText = '✅ 按用户选择使用Ollama生成';
+            } else if (userChoice === 'ollama_fallback') {
+                headerClass = 'bg-warning';
+                statusText = '⚠️ 用户选择Ollama但降级处理';
+            }
+            
+            reportHtml = `
+                <div class="card">
+                    <div class="card-header ${headerClass} text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-robot me-2"></i>🤖 完整AI医学报告 (Ollama)</h5>
+                            <small class="opacity-75">${statusText}</small>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="medical-report-content" style="line-height: 1.6;">
+                            ${formattedReport}
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else if (data.enhanced_report) {
+            // 显示增强版医学报告
+            const report = data.enhanced_report;
+            let headerClass = 'bg-success';
+            let statusText = '';
+            
+            if (userChoice === 'enhanced') {
+                headerClass = 'bg-success';
+                statusText = '✅ 按用户选择生成增强版报告';
+            } else if (userChoice === 'enhanced_fallback') {
+                headerClass = 'bg-info';
+                statusText = '⚠️ 用户选择Ollama但系统不可用，使用增强版';
+            }
+            
+            reportHtml = `
+                <div class="card">
+                    <div class="card-header ${headerClass} text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-file-medical-alt me-2"></i>📋 增强版医学分析报告</h5>
+                            <small class="opacity-75">${statusText}</small>
+                        </div>
+                        <div class="mt-1">
+                            <small class="text-light">${report.report_header.ai_system}</small>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- 报告标题 -->
+                        <div class="row mb-4">
+                            <div class="col-md-8">
+                                <h4 class="text-primary">${report.report_header.title}</h4>
+                                <p class="text-muted mb-0">报告编号: ${report.report_header.report_id}</p>
+                                <p class="text-muted mb-0">生成时间: ${report.report_header.generated_time}</p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <span class="badge bg-info fs-6">AI分析结果</span>
+                            </div>
+                        </div>
+
+                        <!-- 影像分析结果 -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6><i class="fas fa-microscope me-2"></i>影像学分析</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>AI预测:</strong> <span class="badge ${report.imaging_analysis.ai_prediction === 'PNEUMONIA' ? 'bg-warning' : 'bg-success'}">${report.imaging_analysis.ai_prediction === 'PNEUMONIA' ? '疑似肺炎' : '正常'}</span></p>
+                                        <p><strong>置信度:</strong> ${report.imaging_analysis.confidence_score}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>风险分层:</strong> <span class="text-primary">${report.imaging_analysis.risk_stratification}</span></p>
+                                        <p><strong>置信度解释:</strong> ${report.imaging_analysis.confidence_interpretation}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 临床发现 -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6><i class="fas fa-search me-2"></i>临床发现</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>主要解读:</strong> ${report.clinical_findings.primary_interpretation}</p>
+                                
+                                <h6 class="mt-3"><i class="fas fa-list me-2"></i>详细发现:</h6>
+                                <ul>
+                                    ${report.clinical_findings.detailed_findings.map(finding => `<li>${finding}</li>`).join('')}
+                                </ul>
+
+                                ${report.clinical_findings.differential_diagnosis.length > 0 ? `
+                                <h6 class="mt-3"><i class="fas fa-diagnoses me-2"></i>鉴别诊断:</h6>
+                                <ul>
+                                    ${report.clinical_findings.differential_diagnosis.map(diagnosis => `<li>${diagnosis}</li>`).join('')}
+                                </ul>
+                                ` : ''}
+
+                                ${report.clinical_findings.additional_notes ? `
+                                <div class="alert alert-info mt-3">
+                                    <strong>附加说明:</strong> ${report.clinical_findings.additional_notes}
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        <!-- 临床建议 -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6><i class="fas fa-user-md me-2"></i>临床建议</h6>
+                            </div>
+                            <div class="card-body">
+                                <h6><i class="fas fa-exclamation-triangle me-2 text-danger"></i>即时行动建议:</h6>
+                                <ul>
+                                    ${report.clinical_recommendations.immediate_actions.map(action => `<li>${action}</li>`).join('')}
+                                </ul>
+
+                                <h6 class="mt-3"><i class="fas fa-calendar-check me-2 text-info"></i>随访计划:</h6>
+                                <div class="row">
+                                    ${Object.entries(report.clinical_recommendations.follow_up_plan).map(([period, plan]) => `
+                                        <div class="col-md-6">
+                                            <div class="border p-2 mb-2 rounded">
+                                                <strong>${period === 'immediate' ? '即时' : period === 'short_term' ? '短期' : period === 'medium_term' ? '中期' : '长期'}:</strong><br>
+                                                <small>${plan}</small>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+
+                                ${report.clinical_recommendations.additional_testing.length > 0 ? `
+                                <h6 class="mt-3"><i class="fas fa-flask me-2 text-warning"></i>建议的额外检查:</h6>
+                                <ul>
+                                    ${report.clinical_recommendations.additional_testing.map(test => `<li>${test}</li>`).join('')}
+                                </ul>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        <!-- 质量指标和限制 -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6><i class="fas fa-chart-bar me-2"></i>质量指标与限制</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>模型性能:</strong> ${report.quality_metrics.model_performance}</p>
+                                <p><strong>验证说明:</strong> ${report.quality_metrics.validation_notes}</p>
+                                
+                                <h6 class="mt-3">系统限制:</h6>
+                                <ul class="text-muted">
+                                    ${report.quality_metrics.limitations.map(limitation => `<li>${limitation}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 医疗免责声明 -->
+                        <div class="card border-warning">
+                            <div class="card-header bg-warning text-dark">
+                                <h6 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>重要医疗声明</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-danger">
+                                    <strong><i class="fas fa-ambulance me-2"></i>紧急情况指导:</strong><br>
+                                    ${report.medical_disclaimer.emergency_guidance}
+                                </div>
+                                
+                                <ul class="mb-0">
+                                    ${report.medical_disclaimer.important_notes.map(note => `<li>${note}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer text-muted">
+                        <small><i class="fas fa-info-circle me-1"></i>${report.report_header.disclaimer}</small>
+                    </div>
+                </div>
+            `;
+        } else if (data.medical_advice) {
+            // 基础医学建议
+            let statusText = '';
+            if (userChoice === 'enhanced' || userChoice === 'enhanced_fallback') {
+                statusText = '⚠️ 增强版报告生成失败，使用基础建议';
+            } else {
+                statusText = '基础医学建议';
+            }
+            
+            reportHtml = `
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-stethoscope me-2"></i>🩺 基础医学建议</h5>
+                            <small class="opacity-75">${statusText}</small>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-${data.medical_advice.urgency === 'urgent' ? 'danger' : data.medical_advice.urgency === 'moderate' ? 'warning' : 'info'}">
+                            <h6><i class="fas fa-exclamation-triangle me-2"></i>风险等级：${data.medical_advice.risk_level}</h6>
+                            <p class="mb-0">${data.medical_advice.recommendation}</p>
+                        </div>
+                        
+                        <h6><i class="fas fa-lightbulb me-2"></i>置信度解释</h6>
+                        <p>${data.medical_advice.confidence_interpretation}</p>
+                        
+                        <h6><i class="fas fa-exclamation-circle me-2"></i>重要提醒</h6>
+                        <ul>
+                            ${data.medical_advice.disclaimers.map(disclaimer => `<li>${disclaimer}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        } else {
+            let errorMessage = '';
+            if (userChoice === 'ollama') {
+                errorMessage = '用户选择了Ollama完整报告，但系统不可用。请检查Ollama服务状态。';
+            } else if (userChoice === 'enhanced') {
+                errorMessage = '用户选择了增强版报告，但生成失败。请检查系统状态。';
+            } else {
+                errorMessage = '所有报告生成方式都不可用。';
+            }
+            
+            reportHtml = `
+                <div class="card border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>报告生成不可用</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <i class="fas fa-info-circle fa-3x mb-3 text-warning"></i>
+                        <h6>医学报告生成失败</h6>
+                        <p class="text-muted mb-3">${errorMessage}</p>
+                        <div class="alert alert-info">
+                            <strong>建议：</strong><br>
+                            • 如选择Ollama: 确保Ollama服务正在运行<br>
+                            • 如选择增强版: 检查系统模型和依赖<br>
+                            • 当前只能提供基础的图像分析结果
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        $('#medical-report-content').html(reportHtml);
+    }
+
+    // 显示建议
+    function displayRecommendations(data) {
+        const assessment = data.comprehensive_assessment;
+        let recommendationsHtml = '';
+        
+        if (assessment && assessment.recommendations) {
+            const recs = assessment.recommendations;
+            recommendationsHtml = `
+                <div class="row">
+                    ${recs.immediate_actions?.length ? `
+                        <div class="col-md-6 mb-4">
+                            <div class="card border-danger">
+                                <div class="card-header bg-danger text-white">
+                                    <h6 class="mb-0"><i class="fas fa-exclamation me-2"></i>立即行动</h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-unstyled mb-0">
+                                        ${recs.immediate_actions.map(action => `<li><i class="fas fa-arrow-right text-danger me-2"></i>${action}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${recs.follow_up?.length ? `
+                        <div class="col-md-6 mb-4">
+                            <div class="card border-warning">
+                                <div class="card-header bg-warning text-dark">
+                                    <h6 class="mb-0"><i class="fas fa-calendar-check me-2"></i>后续跟进</h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-unstyled mb-0">
+                                        ${recs.follow_up.map(action => `<li><i class="fas fa-arrow-right text-warning me-2"></i>${action}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${recs.lifestyle?.length ? `
+                        <div class="col-md-6 mb-4">
+                            <div class="card border-info">
+                                <div class="card-header bg-info text-white">
+                                    <h6 class="mb-0"><i class="fas fa-heart me-2"></i>生活方式</h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-unstyled mb-0">
+                                        ${recs.lifestyle.map(action => `<li><i class="fas fa-arrow-right text-info me-2"></i>${action}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${recs.when_to_seek_help?.length ? `
+                        <div class="col-md-6 mb-4">
+                            <div class="card border-primary">
+                                <div class="card-header bg-primary text-white">
+                                    <h6 class="mb-0"><i class="fas fa-ambulance me-2"></i>何时就医</h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-unstyled mb-0">
+                                        ${recs.when_to_seek_help.map(condition => `<li><i class="fas fa-arrow-right text-primary me-2"></i>${condition}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+                
+                ${assessment.disclaimers?.length ? `
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-exclamation-triangle me-2"></i>重要声明</h6>
+                        <ul class="mb-0">
+                            ${assessment.disclaimers.map(disclaimer => `<li>${disclaimer}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+            `;
+        } else {
+            recommendationsHtml = `
+                <div class="card">
+                    <div class="card-body text-center text-muted">
+                        <i class="fas fa-lightbulb fa-3x mb-3"></i>
+                        <h5>详细建议生成不可用</h5>
+                        <p>当前只能提供基础分析结果。</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        $('#recommendations-content').html(recommendationsHtml);
+    }
+
+    // 下载报告
+    function downloadReport() {
+        if (currentAnalysisId) {
+            window.open(`/download/${currentAnalysisId}`, '_blank');
+        } else {
+            showNotification('无法下载报告：分析ID不存在', 'error');
+        }
+    }
+
+    // 查看详细报告
+    function viewDetailedReport() {
+        if (currentAnalysisId) {
+            window.open(`/report/${currentAnalysisId}`, '_blank');
+        } else {
+            showNotification('无法查看详细报告：分析ID不存在', 'error');
+        }
+    }
+</script>
+{% endblock %} 

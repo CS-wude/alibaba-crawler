@@ -1,0 +1,69 @@
+{
+  "image_analysis": {
+    "image_path": "static/uploads\\20250812_105403_ea313c16_IM-0015-0001.jpeg",
+    "image_size": [
+      1803,
+      1238
+    ],
+    "predicted_class": "PNEUMONIA",
+    "confidence": 0.6098343133926392,
+    "prediction_time": "2025-08-12T10:54:03.809074",
+    "probabilities": {
+      "NORMAL": 0.39016562700271606,
+      "PNEUMONIA": 0.6098343133926392
+    }
+  },
+  "medical_report": "LLM服务不可用，无法生成详细报告",
+  "comprehensive_assessment": {
+    "risk_assessment": {
+      "level": "低风险",
+      "description": "AI系统检测到轻微异常征象",
+      "urgency": "low",
+      "recommended_action": "建议医疗机构复查，结合临床症状判断"
+    },
+    "confidence_analysis": {
+      "score": 0.6098343133926392,
+      "interpretation": "AI模型对此诊断把握较小，需要专业医生评估",
+      "reliability": "较低可靠性"
+    },
+    "probability_breakdown": {
+      "normal_probability": 0.39016562700271606,
+      "pneumonia_probability": 0.6098343133926392,
+      "dominant_class": "PNEUMONIA"
+    },
+    "recommendations": {
+      "immediate_actions": [
+        "建议在1-2天内就医咨询",
+        "密切观察症状变化"
+      ],
+      "follow_up": [
+        "如症状加重请立即就医",
+        "考虑1周内复查胸片"
+      ],
+      "lifestyle": [
+        "保持充足休息",
+        "多饮水，保持室内空气流通",
+        "避免吸烟和二手烟",
+        "注意保暖，避免受凉"
+      ],
+      "when_to_seek_help": [
+        "出现高热（>38.5°C）",
+        "呼吸困难或胸痛加重",
+        "咳嗽痰液增多或呈脓性",
+        "精神状态明显下降"
+      ]
+    },
+    "disclaimers": [
+      "🚨 重要提醒：本分析结果仅供参考，不能替代专业医生诊断",
+      "💊 如有任何症状或健康担忧，请及时就医",
+      "🏥 最终诊断需要结合临床表现、实验室检查等综合判断",
+      "👨‍⚕️ 请将此报告提供给专业医生作为参考"
+    ]
+  },
+  "system_info": {
+    "image_model": "ResNet50-ChestXRay",
+    "llm_model": "llama2",
+    "analysis_time": "2025-08-12T10:54:03.810073",
+    "image_path": "static/uploads\\20250812_105403_ea313c16_IM-0015-0001.jpeg"
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "image_analysis": {
+    "image_path": "static/uploads\\20250812_131122_db196497_person3_virus_17.jpeg",
+    "image_size": [
+      1344,
+      1120
+    ],
+    "predicted_class": "NORMAL",
+    "confidence": 0.6290137767791748,
+    "prediction_time": "2025-08-12T13:11:22.658753",
+    "probabilities": {
+      "NORMAL": 0.6290137767791748,
+      "PNEUMONIA": 0.3709861636161804
+    }
+  },
+  "medical_report": "## 胸部X光片诊断报告\n\n**检查日期**: 2025-08-12\n**检查方式**: 胸部X光片（AI辅助分析）\n\n**影像学描述**: The chest X-ray image shows a clear view of the thoracic cavity, with no obvious abnormalities detected. The lungs appear to be normal in shape and size, with no evidence of pneumonia or other pulmonary diseases. The heart and great vessels are also visible, with no signs of cardiac disease. The bones and soft tissues of the chest are well-defined, with no evidence of fractures or destructive lesions.\n\n**AI分析结果**:\n- 分类结果：NORMAL\n- 系统置信度：62.9%\n\n**诊断意见**: Based on the AI analysis and my clinical experience, I diagnose this patient as having a normal chest X-ray. There is no evidence of any pulmonary or cardiac disease. However, I would like to stress that this is only a preliminary assessment, and further evaluation may be necessary to rule out any potential underlying conditions.\n\n**建议**: Given the normal findings on the chest X-ray, I recommend:\n\n* Continuing to monitor the patient's symptoms and vital signs, and repeating the X-ray if there are any changes or concerns.\n* Scheduling a follow-up appointment for further evaluation, if necessary.\n\n**备注**: This report is based on AI-assisted analysis, and the final diagnosis should be made after comprehensive review of the patient's medical history, physical examination, and laboratory test results. Any questions or concerns should be addressed to the relevant specialist physicians.",
+  "comprehensive_assessment": {
+    "risk_assessment": {
+      "level": "不确定",
+      "description": "AI系统分析结果不确定",
+      "urgency": "moderate",
+      "recommended_action": "结果不确定，建议专业医生进一步评估"
+    },
+    "confidence_analysis": {
+      "score": 0.6290137767791748,
+      "interpretation": "AI模型对此诊断把握较小，需要专业医生评估",
+      "reliability": "较低可靠性"
+    },
+    "probability_breakdown": {
+      "normal_probability": 0.6290137767791748,
+      "pneumonia_probability": 0.3709861636161804,
+      "dominant_class": "NORMAL"
+    },
+    "recommendations": {
+      "immediate_actions": [
+        "如有症状仍建议咨询医生",
+        "保持定期健康检查"
+      ],
+      "follow_up": [
+        "建议每年进行胸部体检",
+        "如有呼吸系统症状及时就医"
+      ],
+      "lifestyle": [
+        "保持健康的生活方式",
+        "戒烟限酒，适量运动",
+        "保持室内空气质量",
+        "注意防护避免呼吸道感染"
+      ],
+      "when_to_seek_help": [
+        "如出现持续咳嗽、胸痛等症状",
+        "如有发热、呼吸困难等异常",
+        "建议3-6个月后复查"
+      ]
+    },
+    "disclaimers": [
+      "🚨 重要提醒：本分析结果仅供参考，不能替代专业医生诊断",
+      "💊 如有任何症状或健康担忧，请及时就医",
+      "🏥 最终诊断需要结合临床表现、实验室检查等综合判断",
+      "👨‍⚕️ 请将此报告提供给专业医生作为参考"
+    ]
+  },
+  "system_info": {
+    "image_model": "ResNet50-ChestXRay",
+    "llm_model": "llama2:latest",
+    "analysis_time": "2025-08-12T13:12:58.885629",
+    "image_path": "static/uploads\\20250812_131122_db196497_person3_virus_17.jpeg"
+  }
+}

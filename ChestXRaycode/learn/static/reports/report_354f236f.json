@@ -1,0 +1,99 @@
+{
+  "analysis_type": "enhanced_basic",
+  "image_analysis": {
+    "image_path": "static/uploads\\20250814_104000_354f236f_IM-0010-0001.jpeg",
+    "image_size": [
+      1873,
+      1478
+    ],
+    "predicted_class": "NORMAL",
+    "confidence": 0.6571337580680847,
+    "prediction_time": "2025-08-14T10:40:00.655665",
+    "probabilities": {
+      "NORMAL": 0.6571337580680847,
+      "PNEUMONIA": 0.34286630153656006
+    }
+  },
+  "medical_advice": {
+    "risk_level": "不确定",
+    "recommendation": "结果不确定，建议专业医生进一步评估",
+    "urgency": "moderate",
+    "confidence_interpretation": "模型对此预测把握较小",
+    "disclaimers": [
+      "本结果仅供参考，不能替代专业医生诊断",
+      "如有症状或担忧，请及时就医",
+      "最终诊断需要结合临床表现和其他检查"
+    ]
+  },
+  "enhanced_report": {
+    "report_header": {
+      "title": "胸部X线片AI辅助分析报告",
+      "generated_time": "2025年08月14日 10:40:00",
+      "report_id": "RPT20250814104000",
+      "ai_system": "ChestXRay AI 分析系统 v1.0",
+      "disclaimer": "本报告由AI系统生成，仅供临床参考，不能替代专业医生诊断"
+    },
+    "imaging_analysis": {
+      "ai_prediction": "NORMAL",
+      "confidence_score": "65.7%",
+      "confidence_interpretation": "AI模型对此分析结果把握一般",
+      "risk_stratification": "待评估 - 需专业医生确认"
+    },
+    "clinical_findings": {
+      "primary_interpretation": "胸部X线片基本正常",
+      "detailed_findings": [
+        "主要解剖结构显示正常",
+        "未发现明显病理征象",
+        "AI分析结果倾向于正常"
+      ],
+      "differential_diagnosis": [],
+      "additional_notes": "如有临床症状，建议进一步检查或动态观察"
+    },
+    "clinical_recommendations": {
+      "immediate_actions": [
+        "AI分析倾向于正常，但建议专业医生确认",
+        "如有任何呼吸道症状，请及时就医",
+        "建议定期复查或进一步检查",
+        "保持对呼吸系统健康的关注",
+        "必要时进行其他影像学检查"
+      ],
+      "follow_up_plan": {
+        "immediate": "如有症状出现立即就医",
+        "short_term": "3-6个月常规体检",
+        "medium_term": "年度胸部影像学检查",
+        "long_term": "维持健康生活方式"
+      },
+      "additional_testing": [
+        "胸部CT平扫",
+        "动态观察",
+        "必要时专科会诊",
+        "其他针对性检查（根据症状）"
+      ]
+    },
+    "quality_metrics": {
+      "model_performance": "训练准确率: 84.6%",
+      "validation_notes": "AI模型基于大量胸部X线片训练",
+      "limitations": [
+        "AI分析不能替代专业医生判断",
+        "对于早期或不典型病变可能存在漏诊",
+        "影像质量会影响分析准确性",
+        "需要结合临床症状综合判断"
+      ]
+    },
+    "medical_disclaimer": {
+      "important_notes": [
+        "本AI分析结果仅供临床参考",
+        "最终诊断需由执业医师作出",
+        "如有症状或疑虑请及时就医",
+        "本系统不承担任何医疗责任"
+      ],
+      "emergency_guidance": "如出现呼吸困难、胸痛、高热等急症症状，请立即就近急诊科就医"
+    }
+  },
+  "system_info": {
+    "analysis_time": "2025-08-14T10:40:00.656662",
+    "image_model": "ResNet50-ChestXRay",
+    "report_generator": "Enhanced Basic",
+    "analysis_id": "354f236f"
+  }
+}
