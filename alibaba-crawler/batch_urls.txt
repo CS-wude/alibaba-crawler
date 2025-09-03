@@ -1,0 +1,9 @@
+# 批量1688商品链接文件
+# 请在下方添加1688商品链接，每行一个
+# 以 # 开头的行会被忽略
+
+# 示例链接（请替换为你的实际链接）:
+https://detail.1688.com/offer/775610063728.html?offerId=775610063728&spm=a260k.home2025.recommendpart.18
+https://detail.1688.com/offer/816228014618.html?topicCode=202508210010000000000001696268&optName=%E7%83%AD%E7%82%B9%E5%95%86%E6%9C%BA&topicName=%E6%89%8B%E8%A1%A8%E5%AE%9D%E8%97%8F%E9%9B%86&item_id=816228014618&offerId=816228014618&object_id=816228014618&spm=a260k.29939364.recommend.0
+
+# 在此处添加更多链接...
